@@ -11,8 +11,10 @@ import {
 } from "@/lib/calc";
 import { Bar, BarChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { format, subDays } from "date-fns";
-import { Award, DollarSign, Flame, HeartPulse, Cigarette, Trophy } from "lucide-react";
+import { Award, DollarSign, Flame, HeartPulse, Cigarette, Trophy, Calendar, Target, Sparkles, Wind, Moon, Sunrise, PiggyBank, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { differenceInCalendarDays, parseISO } from "date-fns";
+import { dailyLimit as _dl } from "@/lib/calc";
 
 export default function Stats() {
   const { state } = useAppState();
