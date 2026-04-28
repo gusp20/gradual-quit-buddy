@@ -184,25 +184,53 @@ export default function Stats() {
 
       {/* Achievements */}
       <section className="animate-fade-up">
-        <h2 className="text-lg font-semibold mb-3">Achievements</h2>
-        <div className="grid grid-cols-3 gap-3">
-          {achievements.map(({ id, label, got, icon: Icon }) => (
-            <div
-              key={id}
-              className={cn(
-                "rounded-2xl p-3 text-center border transition-smooth",
-                got ? "bg-card border-primary/30 shadow-soft" : "bg-secondary/40 border-border opacity-60"
-              )}
-            >
-              <div className={cn(
-                "h-10 w-10 rounded-xl mx-auto flex items-center justify-center",
-                got ? "gradient-warm" : "bg-secondary"
-              )}>
-                <Icon className={cn("h-5 w-5", got ? "text-accent-foreground" : "text-muted-foreground")} />
+        <div className="flex items-baseline justify-between mb-3">
+          <h2 className="text-lg font-semibold">Achievements</h2>
+          <span className="text-xs text-muted-foreground">
+            {achievements.filter((a) => a.progress >= a.goal).length} / {achievements.length}
+          </span>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {achievements.map(({ id, label, progress, goal, icon: Icon, format }) => {
+            const got = progress >= goal;
+            const pct = Math.min(100, Math.round((progress / goal) * 100));
+            const fmt = format ?? ((n: number) => `${n}`);
+            return (
+              <div
+                key={id}
+                className={cn(
+                  "rounded-2xl p-3 border transition-smooth flex flex-col gap-2",
+                  got ? "bg-card border-primary/30 shadow-soft" : "bg-card/60 border-border"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <div className={cn(
+                    "h-9 w-9 rounded-xl flex items-center justify-center shrink-0",
+                    got ? "gradient-warm" : "bg-secondary"
+                  )}>
+                    <Icon className={cn("h-4 w-4", got ? "text-accent-foreground" : "text-muted-foreground")} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-semibold leading-tight truncate">{label}</p>
+                    {goal > 1 && (
+                      <p className="text-[10px] text-muted-foreground tabular-nums mt-0.5">
+                        {fmt(Math.min(progress, goal))} / {fmt(goal)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+                  <div
+                    className={cn(
+                      "h-full rounded-full transition-all",
+                      got ? "gradient-primary" : "bg-primary/50"
+                    )}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
               </div>
-              <p className="text-[11px] mt-2 font-medium leading-tight">{label}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
     </div>
