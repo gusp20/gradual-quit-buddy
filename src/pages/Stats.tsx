@@ -43,14 +43,45 @@ export default function Stats() {
   const nextMilestone = milestones.find((m) => !m.achieved);
   const achievedCount = milestones.filter((m) => m.achieved).length;
 
-  const achievements = [
-    { id: "first-day", label: "First day logged", got: Object.keys(state.logs).length > 0, icon: Cigarette },
-    { id: "streak-3", label: "3-day streak", got: streak >= 3, icon: Flame },
-    { id: "streak-7", label: "Week under limit", got: streak >= 7, icon: Trophy },
-    { id: "save-50", label: `Save ${plan.currency}50`, got: saved >= 50, icon: DollarSign },
-    { id: "avoid-100", label: "100 cigarettes avoided", got: avoided >= 100, icon: Award },
-    { id: "health-3", label: "3 health milestones", got: achievedCount >= 3, icon: HeartPulse },
+  const daysSinceStart = Math.max(0, differenceInCalendarDays(new Date(), parseISO(plan.startDate)) + 1);
+  const todayCount = state.logs[todayKey()]?.count ?? 0;
+  const todayLimit = dailyLimit(plan, new Date());
+  const underTodayLimit = Object.keys(state.logs).length > 0 && todayCount <= todayLimit;
+  const currentLimit = dailyLimit(plan, new Date());
+  const reductionFromStart = plan.startCount > 0 ? (plan.startCount - currentLimit) / plan.startCount : 0;
+
+  type Achievement = { id: string; label: string; icon: typeof Flame; progress: number; goal: number; format?: (n: number) => string };
+  const achievements: Achievement[] = [
+    { id: "first-day", label: "First log", icon: Cigarette, progress: Object.keys(state.logs).length > 0 ? 1 : 0, goal: 1, format: () => "" },
+    { id: "under-today", label: "Under today's limit", icon: Target, progress: underTodayLimit ? 1 : 0, goal: 1, format: () => "" },
+    { id: "streak-3", label: "3-day streak", icon: Flame, progress: streak, goal: 3 },
+    { id: "streak-7", label: "7-day streak", icon: Flame, progress: streak, goal: 7 },
+    { id: "streak-14", label: "2-week streak", icon: Trophy, progress: streak, goal: 14 },
+    { id: "streak-30", label: "30-day streak", icon: Crown, progress: streak, goal: 30 },
+    { id: "days-7", label: "1 week journey", icon: Calendar, progress: daysSinceStart, goal: 7 },
+    { id: "days-30", label: "1 month journey", icon: Calendar, progress: daysSinceStart, goal: 30 },
+    { id: "days-90", label: "90 days journey", icon: Sunrise, progress: daysSinceStart, goal: 90 },
+    { id: "save-10", label: `Save ${plan.currency}10`, icon: DollarSign, progress: saved, goal: 10, format: (n) => `${plan.currency}${n.toFixed(0)}` },
+    { id: "save-50", label: `Save ${plan.currency}50`, icon: DollarSign, progress: saved, goal: 50, format: (n) => `${plan.currency}${n.toFixed(0)}` },
+    { id: "save-100", label: `Save ${plan.currency}100`, icon: PiggyBank, progress: saved, goal: 100, format: (n) => `${plan.currency}${n.toFixed(0)}` },
+    { id: "save-500", label: `Save ${plan.currency}500`, icon: PiggyBank, progress: saved, goal: 500, format: (n) => `${plan.currency}${n.toFixed(0)}` },
+    { id: "avoid-50", label: "50 avoided", icon: Award, progress: avoided, goal: 50 },
+    { id: "avoid-100", label: "100 avoided", icon: Award, progress: avoided, goal: 100 },
+    { id: "avoid-500", label: "500 avoided", icon: Trophy, progress: avoided, goal: 500 },
+    { id: "avoid-1000", label: "1000 avoided", icon: Crown, progress: avoided, goal: 1000 },
+    { id: "health-1", label: "First breath", icon: Wind, progress: achievedCount, goal: 1 },
+    { id: "health-3", label: "3 health wins", icon: HeartPulse, progress: achievedCount, goal: 3 },
+    { id: "health-5", label: "5 health wins", icon: HeartPulse, progress: achievedCount, goal: 5 },
+    { id: "health-all", label: "Full recovery", icon: Sparkles, progress: achievedCount, goal: HEALTH_MILESTONES.length },
+    { id: "halfway", label: "Halfway there", icon: Target, progress: Math.round(reductionFromStart * 100), goal: 50, format: (n) => `${n}%` },
+    { id: "near-quit", label: "Almost smoke-free", icon: Moon, progress: Math.round(reductionFromStart * 100), goal: 90, format: (n) => `${n}%` },
   ];
+  achievements.sort((a, b) => {
+    const ad = a.progress >= a.goal ? 1 : 0;
+    const bd = b.progress >= b.goal ? 1 : 0;
+    if (ad !== bd) return bd - ad;
+    return (b.progress / b.goal) - (a.progress / a.goal);
+  });
 
   return (
     <div className="px-5 pt-8 pb-4 space-y-6">
