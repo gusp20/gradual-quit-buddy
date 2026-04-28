@@ -11,8 +11,10 @@ import {
 } from "@/lib/calc";
 import { Bar, BarChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { format, subDays } from "date-fns";
-import { Award, DollarSign, Flame, HeartPulse, Cigarette, Trophy } from "lucide-react";
+import { Award, DollarSign, Flame, HeartPulse, Cigarette, Trophy, Calendar, Target, Sparkles, Wind, Moon, Sunrise, PiggyBank, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { differenceInCalendarDays, parseISO } from "date-fns";
+
 
 export default function Stats() {
   const { state } = useAppState();
@@ -41,14 +43,45 @@ export default function Stats() {
   const nextMilestone = milestones.find((m) => !m.achieved);
   const achievedCount = milestones.filter((m) => m.achieved).length;
 
-  const achievements = [
-    { id: "first-day", label: "First day logged", got: Object.keys(state.logs).length > 0, icon: Cigarette },
-    { id: "streak-3", label: "3-day streak", got: streak >= 3, icon: Flame },
-    { id: "streak-7", label: "Week under limit", got: streak >= 7, icon: Trophy },
-    { id: "save-50", label: `Save ${plan.currency}50`, got: saved >= 50, icon: DollarSign },
-    { id: "avoid-100", label: "100 cigarettes avoided", got: avoided >= 100, icon: Award },
-    { id: "health-3", label: "3 health milestones", got: achievedCount >= 3, icon: HeartPulse },
+  const daysSinceStart = Math.max(0, differenceInCalendarDays(new Date(), parseISO(plan.startDate)) + 1);
+  const todayCount = state.logs[todayKey()]?.count ?? 0;
+  const todayLimit = dailyLimit(plan, new Date());
+  const underTodayLimit = Object.keys(state.logs).length > 0 && todayCount <= todayLimit;
+  const currentLimit = dailyLimit(plan, new Date());
+  const reductionFromStart = plan.startCount > 0 ? (plan.startCount - currentLimit) / plan.startCount : 0;
+
+  type Achievement = { id: string; label: string; icon: typeof Flame; progress: number; goal: number; format?: (n: number) => string };
+  const achievements: Achievement[] = [
+    { id: "first-day", label: "First log", icon: Cigarette, progress: Object.keys(state.logs).length > 0 ? 1 : 0, goal: 1, format: () => "" },
+    { id: "under-today", label: "Under today's limit", icon: Target, progress: underTodayLimit ? 1 : 0, goal: 1, format: () => "" },
+    { id: "streak-3", label: "3-day streak", icon: Flame, progress: streak, goal: 3 },
+    { id: "streak-7", label: "7-day streak", icon: Flame, progress: streak, goal: 7 },
+    { id: "streak-14", label: "2-week streak", icon: Trophy, progress: streak, goal: 14 },
+    { id: "streak-30", label: "30-day streak", icon: Crown, progress: streak, goal: 30 },
+    { id: "days-7", label: "1 week journey", icon: Calendar, progress: daysSinceStart, goal: 7 },
+    { id: "days-30", label: "1 month journey", icon: Calendar, progress: daysSinceStart, goal: 30 },
+    { id: "days-90", label: "90 days journey", icon: Sunrise, progress: daysSinceStart, goal: 90 },
+    { id: "save-10", label: `Save ${plan.currency}10`, icon: DollarSign, progress: saved, goal: 10, format: (n) => `${plan.currency}${n.toFixed(0)}` },
+    { id: "save-50", label: `Save ${plan.currency}50`, icon: DollarSign, progress: saved, goal: 50, format: (n) => `${plan.currency}${n.toFixed(0)}` },
+    { id: "save-100", label: `Save ${plan.currency}100`, icon: PiggyBank, progress: saved, goal: 100, format: (n) => `${plan.currency}${n.toFixed(0)}` },
+    { id: "save-500", label: `Save ${plan.currency}500`, icon: PiggyBank, progress: saved, goal: 500, format: (n) => `${plan.currency}${n.toFixed(0)}` },
+    { id: "avoid-50", label: "50 avoided", icon: Award, progress: avoided, goal: 50 },
+    { id: "avoid-100", label: "100 avoided", icon: Award, progress: avoided, goal: 100 },
+    { id: "avoid-500", label: "500 avoided", icon: Trophy, progress: avoided, goal: 500 },
+    { id: "avoid-1000", label: "1000 avoided", icon: Crown, progress: avoided, goal: 1000 },
+    { id: "health-1", label: "First breath", icon: Wind, progress: achievedCount, goal: 1 },
+    { id: "health-3", label: "3 health wins", icon: HeartPulse, progress: achievedCount, goal: 3 },
+    { id: "health-5", label: "5 health wins", icon: HeartPulse, progress: achievedCount, goal: 5 },
+    { id: "health-all", label: "Full recovery", icon: Sparkles, progress: achievedCount, goal: HEALTH_MILESTONES.length },
+    { id: "halfway", label: "Halfway there", icon: Target, progress: Math.round(reductionFromStart * 100), goal: 50, format: (n) => `${n}%` },
+    { id: "near-quit", label: "Almost smoke-free", icon: Moon, progress: Math.round(reductionFromStart * 100), goal: 90, format: (n) => `${n}%` },
   ];
+  achievements.sort((a, b) => {
+    const ad = a.progress >= a.goal ? 1 : 0;
+    const bd = b.progress >= b.goal ? 1 : 0;
+    if (ad !== bd) return bd - ad;
+    return (b.progress / b.goal) - (a.progress / a.goal);
+  });
 
   return (
     <div className="px-5 pt-8 pb-4 space-y-6">
@@ -151,25 +184,53 @@ export default function Stats() {
 
       {/* Achievements */}
       <section className="animate-fade-up">
-        <h2 className="text-lg font-semibold mb-3">Achievements</h2>
-        <div className="grid grid-cols-3 gap-3">
-          {achievements.map(({ id, label, got, icon: Icon }) => (
-            <div
-              key={id}
-              className={cn(
-                "rounded-2xl p-3 text-center border transition-smooth",
-                got ? "bg-card border-primary/30 shadow-soft" : "bg-secondary/40 border-border opacity-60"
-              )}
-            >
-              <div className={cn(
-                "h-10 w-10 rounded-xl mx-auto flex items-center justify-center",
-                got ? "gradient-warm" : "bg-secondary"
-              )}>
-                <Icon className={cn("h-5 w-5", got ? "text-accent-foreground" : "text-muted-foreground")} />
+        <div className="flex items-baseline justify-between mb-3">
+          <h2 className="text-lg font-semibold">Achievements</h2>
+          <span className="text-xs text-muted-foreground">
+            {achievements.filter((a) => a.progress >= a.goal).length} / {achievements.length}
+          </span>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {achievements.map(({ id, label, progress, goal, icon: Icon, format }) => {
+            const got = progress >= goal;
+            const pct = Math.min(100, Math.round((progress / goal) * 100));
+            const fmt = format ?? ((n: number) => `${n}`);
+            return (
+              <div
+                key={id}
+                className={cn(
+                  "rounded-2xl p-3 border transition-smooth flex flex-col gap-2",
+                  got ? "bg-card border-primary/30 shadow-soft" : "bg-card/60 border-border"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <div className={cn(
+                    "h-9 w-9 rounded-xl flex items-center justify-center shrink-0",
+                    got ? "gradient-warm" : "bg-secondary"
+                  )}>
+                    <Icon className={cn("h-4 w-4", got ? "text-accent-foreground" : "text-muted-foreground")} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-semibold leading-tight truncate">{label}</p>
+                    {goal > 1 && (
+                      <p className="text-[10px] text-muted-foreground tabular-nums mt-0.5">
+                        {fmt(Math.min(progress, goal))} / {fmt(goal)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+                  <div
+                    className={cn(
+                      "h-full rounded-full transition-all",
+                      got ? "gradient-primary" : "bg-primary/50"
+                    )}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
               </div>
-              <p className="text-[11px] mt-2 font-medium leading-tight">{label}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
     </div>
