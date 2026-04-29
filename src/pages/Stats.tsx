@@ -156,7 +156,7 @@ export default function Stats() {
           )}
         </div>
         <div className="space-y-2">
-          {milestones.slice(0, 6).map((m) => (
+          {milestones.map((m) => (
             <div
               key={m.title}
               className={cn(
