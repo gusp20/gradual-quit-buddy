@@ -182,6 +182,40 @@ export default function Onboarding() {
               </div>
             </div>
           )}
+
+          {step === 4 && (
+            <div className="space-y-6">
+              <div className="h-16 w-16 rounded-3xl gradient-primary shadow-glow flex items-center justify-center">
+                <ShieldCheck className="h-8 w-8 text-primary-foreground" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-semibold mb-2">Your data stays here</h2>
+                <p className="text-muted-foreground leading-relaxed">
+                  Ease works fully offline. No account, no sign-up, nothing sent to the cloud.
+                </p>
+              </div>
+              <div className="bg-card rounded-3xl p-5 shadow-soft space-y-3 text-sm">
+                <div className="flex gap-3">
+                  <span className="h-6 w-6 shrink-0 rounded-full bg-primary/15 text-primary flex items-center justify-center mt-0.5">
+                    <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                  </span>
+                  <p className="text-foreground/80">Everything is saved only on this device.</p>
+                </div>
+                <div className="flex gap-3">
+                  <span className="h-6 w-6 shrink-0 rounded-full bg-primary/15 text-primary flex items-center justify-center mt-0.5">
+                    <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                  </span>
+                  <p className="text-foreground/80">If you delete the app or switch phones, your progress won't sync over.</p>
+                </div>
+                <div className="flex gap-3">
+                  <span className="h-6 w-6 shrink-0 rounded-full bg-primary/15 text-primary flex items-center justify-center mt-0.5">
+                    <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                  </span>
+                  <p className="text-foreground/80">No tracking, no ads, no third parties.</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex gap-3 mt-8">
