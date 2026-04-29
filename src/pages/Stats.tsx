@@ -69,7 +69,7 @@ export default function Stats() {
     { id: "avoid-100", label: "100 avoided", icon: Award, progress: avoided, goal: 100 },
     { id: "avoid-500", label: "500 avoided", icon: Trophy, progress: avoided, goal: 500 },
     { id: "avoid-1000", label: "1000 avoided", icon: Crown, progress: avoided, goal: 1000 },
-    { id: "health-1", label: "First breath", icon: Wind, progress: achievedCount, goal: 1 },
+    { id: "health-1", label: "First health win", icon: Wind, progress: achievedCount, goal: 1 },
     { id: "health-3", label: "3 health wins", icon: HeartPulse, progress: achievedCount, goal: 3 },
     { id: "health-5", label: "5 health wins", icon: HeartPulse, progress: achievedCount, goal: 5 },
     { id: "health-all", label: "Full recovery", icon: Sparkles, progress: achievedCount, goal: HEALTH_MILESTONES.length },
