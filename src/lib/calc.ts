@@ -33,8 +33,10 @@ export function moneySaved(plan: UserPlan, logs: Record<string, DailyLog>): numb
   for (let i = 0; i < days; i++) {
     const d = subDays(today, days - 1 - i);
     const key = todayKey(d);
-    const smoked = logs[key]?.count ?? 0;
-    saved += (plan.startCount - smoked) * pricePerCig;
+    const log = logs[key];
+    // Only credit days the user actually logged — otherwise we'd reward inactivity.
+    if (!log) continue;
+    saved += (plan.startCount - log.count) * pricePerCig;
   }
   return Math.max(0, saved);
 }
@@ -47,8 +49,9 @@ export function cigarettesAvoided(plan: UserPlan, logs: Record<string, DailyLog>
   let avoided = 0;
   for (let i = 0; i < days; i++) {
     const d = subDays(today, days - 1 - i);
-    const smoked = logs[todayKey(d)]?.count ?? 0;
-    avoided += Math.max(0, plan.startCount - smoked);
+    const log = logs[todayKey(d)];
+    if (!log) continue;
+    avoided += Math.max(0, plan.startCount - log.count);
   }
   return avoided;
 }
@@ -61,9 +64,13 @@ export function streakUnderLimit(plan: UserPlan, logs: Record<string, DailyLog>)
     const key = todayKey(d);
     const limit = dailyLimit(plan, d);
     const log = logs[key];
-    // skip today if no smokes yet — count it only if user has logged or limit met
-    if (i === 0 && !log) continue;
-    if ((log?.count ?? 0) <= limit) streak++;
+    // Streak requires an actual log for that day. Today is allowed to be empty
+    // (we won't penalize you for not having smoked yet) but it doesn't add to the streak either.
+    if (!log) {
+      if (i === 0) continue;
+      break;
+    }
+    if (log.count <= limit) streak++;
     else break;
   }
   return streak;
