@@ -7,7 +7,7 @@ import { CadenceWeeks, PACE_LABEL, PACE_PERCENT, ReductionPace } from "@/lib/typ
 import { cn } from "@/lib/utils";
 import { dailyLimit, getCadenceLabel } from "@/lib/calc";
 import { format, parseISO } from "date-fns";
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import { AlertTriangle, RefreshCw, Beer } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -164,6 +164,22 @@ export default function Profile() {
 
         <p className="text-xs text-center text-muted-foreground mt-4">
           All your data lives only on this device. Nothing is uploaded.
+        </p>
+      </section>
+
+      {/* Support */}
+      <section className="animate-fade-up pt-2 pb-2">
+        <a
+          href="https://buymeacoffee.com/studioamigo"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 w-full h-12 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 font-semibold shadow-soft hover:opacity-90 transition-smooth"
+        >
+          <Beer className="h-5 w-5" />
+          Buy dev a beer
+        </a>
+        <p className="text-xs text-center text-muted-foreground mt-3">
+          Enjoying the app? A small tip keeps it ad-free.
         </p>
       </section>
     </div>
