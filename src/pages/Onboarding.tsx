@@ -230,7 +230,7 @@ export default function Onboarding() {
             </Button>
           ) : (
             <Button onClick={finish} size="lg" className="flex-1 h-14 rounded-2xl gradient-primary text-primary-foreground border-0 shadow-soft text-base">
-              Start my plan
+              I understand
             </Button>
           )}
         </div>
