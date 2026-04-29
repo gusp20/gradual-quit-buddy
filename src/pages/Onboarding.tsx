@@ -5,9 +5,9 @@ import { Label } from "@/components/ui/label";
 import { CadenceWeeks, PACE_LABEL, PACE_PERCENT, ReductionPace, UserPlan } from "@/lib/types";
 import { useAppState } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { ArrowRight, Leaf, Check } from "lucide-react";
+import { ArrowRight, Leaf, Check, ShieldCheck } from "lucide-react";
 
-const STEPS = 4;
+const STEPS = 5;
 
 export default function Onboarding() {
   const { completeOnboarding } = useAppState();
@@ -87,13 +87,13 @@ export default function Onboarding() {
                 <input
                   type="range"
                   min={1}
-                  max={60}
+                  max={100}
                   value={count}
                   onChange={(e) => setCount(parseInt(e.target.value))}
                   className="w-full mt-6 accent-primary"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                  <span>1</span><span>60</span>
+                  <span>1</span><span>100</span>
                 </div>
               </div>
             </div>
