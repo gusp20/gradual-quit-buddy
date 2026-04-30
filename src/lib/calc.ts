@@ -85,18 +85,38 @@ export function lastSmokeGapMs(logs: Record<string, DailyLog>): number {
   return Date.now() - latest;
 }
 
-/** Health milestones based on time since last cigarette. */
-export const HEALTH_MILESTONES: { afterMs: number; title: string; body: string }[] = [
-  { afterMs: 20 * 60 * 1000, title: "20 minutes", body: "Heart rate and blood pressure drop." },
-  { afterMs: 12 * 60 * 60 * 1000, title: "12 hours", body: "Carbon monoxide in blood returns to normal." },
-  { afterMs: 24 * 60 * 60 * 1000, title: "1 day", body: "Risk of heart attack starts to decrease." },
-  { afterMs: 2 * 24 * 60 * 60 * 1000, title: "2 days", body: "Sense of taste and smell improve." },
-  { afterMs: 3 * 24 * 60 * 60 * 1000, title: "3 days", body: "Bronchial tubes relax — easier breathing." },
-  { afterMs: 14 * 24 * 60 * 60 * 1000, title: "2 weeks", body: "Circulation and lung function improve." },
-  { afterMs: 30 * 24 * 60 * 60 * 1000, title: "1 month", body: "Coughing and shortness of breath decrease." },
-  { afterMs: 90 * 24 * 60 * 60 * 1000, title: "3 months", body: "Lung function increases up to 30%." },
-  { afterMs: 365 * 24 * 60 * 60 * 1000, title: "1 year", body: "Risk of coronary heart disease cut in half." },
+/** Reduction milestones based on cutting back from the starting count. */
+export type ReductionMilestone = {
+  id: string;
+  title: string;
+  body: string;
+  /** Predicate: did the user reach this milestone? */
+  achieved: (ctx: { reductionPct: number; smokeFreeDays: number; daysSinceStart: number }) => boolean;
+};
+
+export const REDUCTION_MILESTONES: ReductionMilestone[] = [
+  { id: "cut-25", title: "25% reduction", body: "You're smoking a quarter less than when you started.", achieved: (c) => c.reductionPct >= 25 },
+  { id: "cut-50", title: "Halfway there", body: "You've cut your daily intake in half.", achieved: (c) => c.reductionPct >= 50 },
+  { id: "cut-75", title: "75% reduction", body: "Down to a quarter of where you began.", achieved: (c) => c.reductionPct >= 75 },
+  { id: "first-week", title: "First week logged", body: "Seven days of tracking — the habit is forming.", achieved: (c) => c.daysSinceStart >= 7 },
+  { id: "first-month", title: "One month in", body: "A full month of conscious effort.", achieved: (c) => c.daysSinceStart >= 30 },
+  { id: "free-1", title: "First smoke-free day", body: "A whole day without a single cigarette.", achieved: (c) => c.smokeFreeDays >= 1 },
+  { id: "free-7", title: "7 smoke-free days", body: "A full smoke-free week.", achieved: (c) => c.smokeFreeDays >= 7 },
+  { id: "free-30", title: "30 smoke-free days", body: "A smoke-free month — huge milestone.", achieved: (c) => c.smokeFreeDays >= 30 },
+  { id: "free-90", title: "90 smoke-free days", body: "Three months smoke-free. You did it.", achieved: (c) => c.smokeFreeDays >= 90 },
 ];
+
+/** Counts logged days where count === 0. */
+export function smokeFreeDaysCount(logs: Record<string, DailyLog>): number {
+  return Object.values(logs).filter((l) => l.count === 0).length;
+}
+
+/** Current reduction percentage based on today's limit vs the starting count. */
+export function currentReductionPercent(plan: UserPlan, date: Date = new Date()): number {
+  if (plan.startCount <= 0) return 0;
+  const limit = dailyLimit(plan, date);
+  return Math.max(0, Math.min(100, Math.round(((plan.startCount - limit) / plan.startCount) * 100)));
+}
 
 export function getCadenceLabel(c: CadenceWeeks) {
   return c === 1 ? "Every week" : `Every ${c} weeks`;
