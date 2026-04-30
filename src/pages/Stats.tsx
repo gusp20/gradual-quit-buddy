@@ -2,10 +2,11 @@ import { useMemo } from "react";
 import { useAppState } from "@/lib/store";
 import {
   cigarettesAvoided,
+  currentReductionPercent,
   dailyLimit,
-  HEALTH_MILESTONES,
-  lastSmokeGapMs,
+  REDUCTION_MILESTONES,
   moneySaved,
+  smokeFreeDaysCount,
   streakUnderLimit,
   todayKey,
 } from "@/lib/calc";
@@ -23,7 +24,8 @@ export default function Stats() {
   const saved = moneySaved(plan, state.logs);
   const avoided = cigarettesAvoided(plan, state.logs);
   const streak = streakUnderLimit(plan, state.logs);
-  const gapMs = lastSmokeGapMs(state.logs);
+  const smokeFreeDays = smokeFreeDaysCount(state.logs);
+  const reductionPct = currentReductionPercent(plan, new Date());
 
   const chartData = useMemo(() => {
     const days = 14;
@@ -39,7 +41,11 @@ export default function Stats() {
     });
   }, [plan, state.logs]);
 
-  const milestones = HEALTH_MILESTONES.map((m) => ({ ...m, achieved: gapMs >= m.afterMs }));
+  const daysSinceStartForMilestones = Math.max(0, differenceInCalendarDays(new Date(), parseISO(plan.startDate)) + 1);
+  const milestones = REDUCTION_MILESTONES.map((m) => ({
+    ...m,
+    achieved: m.achieved({ reductionPct, smokeFreeDays, daysSinceStart: daysSinceStartForMilestones }),
+  }));
   const nextMilestone = milestones.find((m) => !m.achieved);
   const achievedCount = milestones.filter((m) => m.achieved).length;
 
@@ -72,7 +78,7 @@ export default function Stats() {
     { id: "health-1", label: "First health win", icon: Wind, progress: achievedCount, goal: 1 },
     { id: "health-3", label: "3 health wins", icon: HeartPulse, progress: achievedCount, goal: 3 },
     { id: "health-5", label: "5 health wins", icon: HeartPulse, progress: achievedCount, goal: 5 },
-    { id: "health-all", label: "Full recovery", icon: Sparkles, progress: achievedCount, goal: HEALTH_MILESTONES.length },
+    { id: "health-all", label: "All milestones", icon: Sparkles, progress: achievedCount, goal: REDUCTION_MILESTONES.length },
     { id: "halfway", label: "Halfway there", icon: Target, progress: Math.round(reductionFromStart * 100), goal: 50, format: (n) => `${n}%` },
     { id: "near-quit", label: "Almost smoke-free", icon: Moon, progress: Math.round(reductionFromStart * 100), goal: 90, format: (n) => `${n}%` },
   ];
@@ -111,7 +117,7 @@ export default function Stats() {
           icon={<Flame className="h-4 w-4" />}
         />
         <BigStat
-          label="Health milestones"
+          label="Milestones"
           value={`${achievedCount} / ${milestones.length}`}
           accent="warm"
           icon={<HeartPulse className="h-4 w-4" />}
@@ -147,10 +153,10 @@ export default function Stats() {
         </div>
       </section>
 
-      {/* Health milestones */}
+      {/* Reduction milestones */}
       <section className="space-y-3 animate-fade-up">
         <div className="flex items-baseline justify-between">
-          <h2 className="text-lg font-semibold">Health recovery</h2>
+          <h2 className="text-lg font-semibold">Reduction milestones</h2>
           {nextMilestone && (
             <span className="text-xs text-muted-foreground">Next: {nextMilestone.title}</span>
           )}
