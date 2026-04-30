@@ -117,7 +117,7 @@ export default function Stats() {
           icon={<Flame className="h-4 w-4" />}
         />
         <BigStat
-          label="Health milestones"
+          label="Milestones"
           value={`${achievedCount} / ${milestones.length}`}
           accent="warm"
           icon={<HeartPulse className="h-4 w-4" />}
@@ -153,10 +153,10 @@ export default function Stats() {
         </div>
       </section>
 
-      {/* Health milestones */}
+      {/* Reduction milestones */}
       <section className="space-y-3 animate-fade-up">
         <div className="flex items-baseline justify-between">
-          <h2 className="text-lg font-semibold">Health recovery</h2>
+          <h2 className="text-lg font-semibold">Reduction milestones</h2>
           {nextMilestone && (
             <span className="text-xs text-muted-foreground">Next: {nextMilestone.title}</span>
           )}
