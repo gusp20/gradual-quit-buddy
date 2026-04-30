@@ -78,7 +78,7 @@ export default function Stats() {
     { id: "health-1", label: "First health win", icon: Wind, progress: achievedCount, goal: 1 },
     { id: "health-3", label: "3 health wins", icon: HeartPulse, progress: achievedCount, goal: 3 },
     { id: "health-5", label: "5 health wins", icon: HeartPulse, progress: achievedCount, goal: 5 },
-    { id: "health-all", label: "Full recovery", icon: Sparkles, progress: achievedCount, goal: HEALTH_MILESTONES.length },
+    { id: "health-all", label: "All milestones", icon: Sparkles, progress: achievedCount, goal: REDUCTION_MILESTONES.length },
     { id: "halfway", label: "Halfway there", icon: Target, progress: Math.round(reductionFromStart * 100), goal: 50, format: (n) => `${n}%` },
     { id: "near-quit", label: "Almost smoke-free", icon: Moon, progress: Math.round(reductionFromStart * 100), goal: 90, format: (n) => `${n}%` },
   ];
