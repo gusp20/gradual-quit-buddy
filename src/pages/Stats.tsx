@@ -24,7 +24,8 @@ export default function Stats() {
   const saved = moneySaved(plan, state.logs);
   const avoided = cigarettesAvoided(plan, state.logs);
   const streak = streakUnderLimit(plan, state.logs);
-  const gapMs = lastSmokeGapMs(state.logs);
+  const smokeFreeDays = smokeFreeDaysCount(state.logs);
+  const reductionPct = currentReductionPercent(plan, new Date());
 
   const chartData = useMemo(() => {
     const days = 14;
@@ -40,7 +41,11 @@ export default function Stats() {
     });
   }, [plan, state.logs]);
 
-  const milestones = HEALTH_MILESTONES.map((m) => ({ ...m, achieved: gapMs >= m.afterMs }));
+  const daysSinceStartForMilestones = Math.max(0, differenceInCalendarDays(new Date(), parseISO(plan.startDate)) + 1);
+  const milestones = REDUCTION_MILESTONES.map((m) => ({
+    ...m,
+    achieved: m.achieved({ reductionPct, smokeFreeDays, daysSinceStart: daysSinceStartForMilestones }),
+  }));
   const nextMilestone = milestones.find((m) => !m.achieved);
   const achievedCount = milestones.filter((m) => m.achieved).length;
 
