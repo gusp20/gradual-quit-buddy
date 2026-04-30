@@ -2,10 +2,11 @@ import { useMemo } from "react";
 import { useAppState } from "@/lib/store";
 import {
   cigarettesAvoided,
+  currentReductionPercent,
   dailyLimit,
-  HEALTH_MILESTONES,
-  lastSmokeGapMs,
+  REDUCTION_MILESTONES,
   moneySaved,
+  smokeFreeDaysCount,
   streakUnderLimit,
   todayKey,
 } from "@/lib/calc";
