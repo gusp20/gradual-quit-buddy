@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.gradualquitbuddy',
+  appId: 'com.amigo.ease',
   appName: 'gradual-quit-buddy',
   webDir: 'dist',
   server: {
